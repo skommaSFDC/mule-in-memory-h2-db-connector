@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd">
+	
+	<flow name="h2-db-insert" doc:id="df6072bf-bcfc-4114-a187-b5b8cbab0e8a">
+		<http:listener doc:name="/load-pcmm-mock-response" doc:id="f20c74cb-05c0-448e-9c98-11c1c70eff8e" path="/load-pcmm-mock-response"
+			allowedMethods="POST" config-ref="HTTP_Listener_config" />
+		<set-variable value="#[payload]" doc:name="Save Payload" doc:id="9f63c8b4-9e87-4489-aa13-31b10c3caaa1" variableName="data" />
+		<db:delete doc:name="Delete Existing Row" doc:id="289e70e9-a5db-40a1-8a5f-e45cafd81f1c" config-ref="H2_Db_Config">
+			<db:sql><![CDATA[delete from PCMM_MOCK_DATA where ICN = :icn]]></db:sql>
+			<db:input-parameters><![CDATA[#[{'icn': vars.data.PatientSummary.@icn default ''}]]]></db:input-parameters>
+		</db:delete>
+		<db:insert doc:name="Insert into DB" doc:id="6bdf96eb-6f86-455e-8566-ee931c86f9d7" config-ref="H2_Db_Config">
+			<db:sql><![CDATA[insert into PCMM_MOCK_DATA (ICN, MOCK_XML) VALUES (:icn, :data)]]></db:sql>
+			<db:input-parameters><![CDATA[#[{'icn': vars.data.PatientSummary.@icn default '', 
+'data' : write(vars.data, 'application/xml')
+}]]]></db:input-parameters>
+		</db:insert>
+		<set-payload value='#["Inserted rows: " ++ payload.affectedRows as Number]' doc:name="Return result"
+			doc:id="47cff5c8-601e-4e70-b5a3-1ea0c3d6d5e0" mimeType="text/plain" />
+
+	</flow>	
+</mule>

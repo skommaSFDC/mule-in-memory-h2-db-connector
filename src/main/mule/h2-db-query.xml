@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd">
+	<flow name="h2-db-query" doc:id="a0805346-4059-4250-9619-0f90bd7bd125" >
+		<http:listener doc:name="/query-pcmm-mock-response" doc:id="a0f8fe54-aa82-400d-8bb0-032a73e5706b" config-ref="HTTP_Listener_config" path="/query-pcmm-mock-response" >
+			<http:response statusCode="#[vars.httpStatus default 200]" >
+				<http:headers ><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+			</http:response>
+			<http:error-response statusCode="#[vars.httpStatus default 500]" >
+				<http:body ><![CDATA[#[payload]]]></http:body>
+				<http:headers ><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+			</http:error-response>
+		</http:listener>
+		<db:select doc:name="Select DB record for a given icn" doc:id="197c4c18-4d38-4655-80ca-e43fa492e3fc" config-ref="H2_Db_Config" >
+			<db:sql ><![CDATA[select MOCK_XML from PCMM_MOCK_DATA where icn = :icn]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{ 'icn': attributes.queryParams.icn default '' }]]]></db:input-parameters>
+		</db:select>
+		<choice doc:name="Choice" doc:id="6a92faaa-1c1d-4bbf-969e-1c7a87f66e5e" >
+			<when expression="#[payload != null and sizeOf(payload) &gt; 0]" >
+				<set-payload value="#[payload[0].MOCK_XML]" doc:name="Return XML payload from DB" doc:id="2d50a324-747c-4991-8c84-e5e43dc67740" mimeType="application/xml" />
+			</when>
+			<otherwise >
+				<set-payload value='#["&lt;?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?&gt;&lt;PatientSummary&gt;&lt;PatientSummaryText&gt;&lt;![CDATA[ PACT data not found for the given criteria.]]&gt;&lt;/PatientSummaryText&gt;&lt;nonVAPCProviders/&gt;&lt;patientAssignmentsAtStations/&gt;&lt;nonVAProviders/&gt;&lt;/PatientSummary&gt;"]' doc:name="Return Data Not Found Payload" doc:id="2fec2c72-a512-4172-91e9-cfb4dc753995" mimeType="application/xml" />
+			</otherwise>
+		</choice>
+	</flow>
+</mule>

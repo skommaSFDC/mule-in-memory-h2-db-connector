@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+	<munit:config name="h2-db-query-suite-match.xml" />
+	<munit:before-test name="h2-db-query-suite-matchBefore_Test" doc:id="cf7c946b-19e6-43be-8fe5-e13049ca7301" >
+		<munit:set-event doc:name="Set Input" doc:id="e2ca1d36-dc58-44b8-9651-c2d2177ab6b6" >
+			<munit:payload value="#[output application/xml --- readUrl('classpath://h2dbinserttest\set-event_payload.dwl')]" encoding="UTF-8" mediaType="application/xml" />
+			<munit:attributes value="#[readUrl('classpath://h2dbinserttest\set-event_attributes.dwl')]" />
+		</munit:set-event>
+		<flow-ref doc:name="Insert Data Before Test" doc:id="51e4b98d-7f28-4cb9-9dfd-994e9198e00b" name="h2-db-insert"/>
+	</munit:before-test>
+	<munit:test name="h2-db-query-match-test" doc:id="8f7c40e2-5ade-4e19-96b7-eddbd5c217de" >
+		<munit:behavior >
+			<munit:set-event doc:name="Set Input" doc:id="e4be1cb0-5080-4ff0-8a2c-f773200c85ab" >
+				<munit:payload value="#[readUrl('classpath://h2dbquerymatchtest\set-event_payload.dwl')]" encoding="UTF-8" />
+				<munit:attributes value="#[readUrl('classpath://h2dbquerymatchtest\set-event_attributes.dwl')]" />
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to h2-db-query" doc:id="9814a47c-3ab0-4008-b9e6-99def451e3a7" name="h2-db-query"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert doc:name="Assert payload" doc:id="5ff3a337-9fc4-4175-ad2c-dacd59ff39ac" message="The payload does not match">
+				<munit-tools:that ><![CDATA[#[%dw 2.0
+import h2dbquerymatchtest::assert_expression_payload
+---
+assert_expression_payload::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+			</munit-tools:assert>
+		</munit:validation>
+	</munit:test>
+
+
+</mule>

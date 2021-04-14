@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="h2-db-ddlFlow" doc:id="d01b9b0b-5711-48cf-8552-2a92c7b61925" >
+		<http:listener doc:name="Listener" doc:id="13ea1cef-1f0c-44fa-abb4-b249f4b8b294" config-ref="HTTP_Listener_config" path="/ddl"/>
+		<db:execute-ddl doc:name="Create PCMM_MOCK_DATA table" doc:id="221ea3a4-606e-48e4-8217-a9b163e668e2" config-ref="H2_Db_Config">
+			<db:sql ><![CDATA[CREATE TABLE IF NOT EXISTS "PUBLIC"."PCMM_MOCK_DATA"(
+    "ICN" VARCHAR(30),
+    "MOCK_XML" CLOB
+)]]></db:sql>
+		</db:execute-ddl>
+		<ee:transform doc:name="Transform Message" doc:id="9233ad6f-c5e7-4122-89b8-2ced7f970880" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>

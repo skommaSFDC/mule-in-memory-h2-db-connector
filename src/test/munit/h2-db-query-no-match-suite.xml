@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:munit="http://www.mulesoft.org/schema/mule/munit"
+	xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd">
+	<munit:config name="h2-db-query-no-match-suite.xml" />
+	<munit:test name="h2-db-query-no-match-test" doc:id="05bbe34c-3c27-4ea4-a38a-412f46127864" >
+		<munit:behavior >
+			<munit:set-event doc:name="Set Input" doc:id="57587747-89a4-4d1a-bc48-0f3fcb7c3528" >
+				<munit:payload value="#[readUrl('classpath://h2dbquerynomatchtest\set-event_payload.dwl')]" encoding="UTF-8" />
+				<munit:attributes value="#[readUrl('classpath://h2dbquerynomatchtest\set-event_attributes.dwl')]" />
+			</munit:set-event>
+			<db:delete doc:name="Delete Existing Data" doc:id="0731c598-f15a-4e4f-9a7b-863ac8a586e5" config-ref="H2_Db_Config" target="vDeleteResult">
+				<db:sql ><![CDATA[delete from PCMM_MOCK_DATA where ICN = :icn]]></db:sql>
+				<db:input-parameters ><![CDATA[#[{ 'icn': attributes.queryParams.icn default '' }]]]></db:input-parameters>
+			</db:delete>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to h2-db-query" doc:id="02d0234f-2473-4961-9202-27e5015a3ab1" name="h2-db-query"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert doc:name="Assert payload" doc:id="f075a519-7be0-4c74-9bc3-b3363367187a" message="The payload does not match">
+				<munit-tools:that ><![CDATA[#[%dw 2.0
+import h2dbquerynomatchtest::assert_expression_payload
+---
+assert_expression_payload::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+			</munit-tools:assert>
+		</munit:validation>
+	</munit:test>
+
+
+</mule>

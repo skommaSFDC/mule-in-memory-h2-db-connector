@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+	<munit:config name="h2-db-ddl-suite.xml" />
+	<munit:test name="h2-db-ddlFlow-test" doc:id="9a39a52d-502f-4552-9025-00f4b3fa6bd2" >
+		<munit:behavior >
+			<munit:set-event doc:name="Set Input" doc:id="f330918a-f290-471b-8595-8eda471d2824" >
+				<munit:payload value="#[readUrl('classpath://h2dbddlFlowtest\set-event_payload.dwl')]" encoding="UTF-8" />
+				<munit:attributes value="#[readUrl('classpath://h2dbddlFlowtest\set-event_attributes.dwl')]" />
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to h2-db-ddlFlow" doc:id="c44a2825-9b1c-4bda-9728-46d6fa605c6e" name="h2-db-ddlFlow"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert doc:name="Assert payload" doc:id="68f8db0b-73f6-42f4-8ae3-78712964df88" message="The payload does not match">
+				<munit-tools:that ><![CDATA[#[%dw 2.0
+import h2dbddlFlowtest::assert_expression_payload
+---
+assert_expression_payload::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+			</munit-tools:assert>
+		</munit:validation>
+	</munit:test>
+
+
+</mule>
