@@ -10,3 +10,12 @@ __Note:__ Database Config in the project shows __${app.home}/h2db/mule__ as the 
 5) Copy the __mule.mv.db__ file form __C:/h2db__ to the folder __/src/main/resources/h2db__
 6) Then you are ready to modify the URL in Database Config (H2_Db_Config in global.xml) back to: __${app.home}/h2db/mule__
 7) Run the Munit tests to make sure all tests pass
+
+You can view the actual H2 DB in a web console by running this java command from the folder having the *h2-1.4.200.jar* :  __java -cp h2-1.4.200.jar org.h2.tools.Server -web__  (jar file can be found in Project Libraries of the workspace). It will open H2 Console like shown below:
+
+![image](https://user-images.githubusercontent.com/16226297/114755114-4d3c1280-9d27-11eb-9d96-2cb3e8b43067.png)
+
+Once you click Connect, it will show the DB like shown below:
+
+![image](https://user-images.githubusercontent.com/16226297/114755456-a4da7e00-9d27-11eb-819b-8d597b1bc0d1.png)
+
